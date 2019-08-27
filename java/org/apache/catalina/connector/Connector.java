@@ -66,15 +66,49 @@ public class Connector extends LifecycleMBeanBase  {
 
     // ------------------------------------------------------------ Constructor
 
+    /** * @Description:
+     * in tomcat 9:
+     * //默认connector为HTTP/1.1 NIO
+     *     public Connector() {
+     *         this("org.apache.coyote.http11.Http11NioProtocol");
+     *     }
+     * @Param:
+     * @return:
+     * @Author: cliffcw
+     * @Date:
+     */
     public Connector() {
-        this(null);
+        this(null); //tomcat 9 已默认为org.apache.coyote.http11.Http11NioProtocol
     }
 
     public Connector(String protocol) {
-        setProtocol(protocol);
+        setProtocol(protocol); //在tomcat 9 此代码已废除，用如下代替
+        /**
+         * boolean aprConnector = AprLifecycleListener.isAprAvailable() &&
+         *                 AprLifecycleListener.getUseAprConnector();
+         *         if ("HTTP/1.1".equals(protocol) || protocol == null) {
+         *             if (aprConnector) {
+         *                 protocolHandlerClassName = "org.apache.coyote.http11.Http11AprProtocol";
+         *             } else {
+         *                 protocolHandlerClassName = "org.apache.coyote.http11.Http11NioProtocol";
+         *             }
+         *         } else if ("AJP/1.3".equals(protocol)) {
+         *             if (aprConnector) {
+         *                 protocolHandlerClassName = "org.apache.coyote.ajp.AjpAprProtocol";
+         *             } else {
+         *                 protocolHandlerClassName = "org.apache.coyote.ajp.AjpNioProtocol";
+         *             }
+         *         } else {
+         *             protocolHandlerClassName = protocol;
+         *         }
+         *
+         */
         // Instantiate protocol handler
         ProtocolHandler p = null;
         try {
+            /**
+             * 通过反射实例化一个protocolHandle,之后对请求数据的解析都由该protocolHandle完成，例如Http11AprProtocol
+             */
             Class<?> clazz = Class.forName(protocolHandlerClassName);
             p = (ProtocolHandler) clazz.getConstructor().newInstance();
         } catch (Exception e) {
@@ -1001,6 +1035,8 @@ public class Connector extends LifecycleMBeanBase  {
     /**
      * Begin processing requests via this Connector.
      *
+     * 启动protocolHandler
+     *
      * @exception LifecycleException if a fatal startup error occurs
      */
     @Override
@@ -1015,6 +1051,11 @@ public class Connector extends LifecycleMBeanBase  {
         setState(LifecycleState.STARTING);
 
         try {
+            /**
+             * 启动protocolHandler
+             * Http11NioProtocol创建一个org.apache.tomcat.util.net.NioEndpoint实例,然后将监听端口并解析请求的工作全被委托给NioEndpoint实现。
+             * tomcat在使用Http11NioProtocol解析HTTP请求时一共设计了三种线程，分别为Acceptor，Poller和Worker。
+             */
             protocolHandler.start();
         } catch (Exception e) {
             throw new LifecycleException(

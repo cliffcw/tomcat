@@ -271,6 +271,7 @@ public class Catalina {
 
 
     /**
+     * 创建Digester的方式解析server.xml并且生成Server，Service，Connector和Container实例
      * Create and configure the Digester we will be using for startup.
      * @return the main digester to parse server.xml
      */
@@ -542,6 +543,15 @@ public class Catalina {
         // Before digester - it may be needed
         initNaming();
 
+        /** * @Description:
+         *
+         * 创建Digester的方式解析server.xml并且生成Server，Service，Connector和Container实例
+         *
+         * @Param:
+         * @return:
+         * @Author: cliffcw
+         * @Date:
+         */
         // Create and execute our Digester
         Digester digester = createStartDigester();
 
@@ -550,6 +560,12 @@ public class Catalina {
         File file = null;
         try {
             try {
+                /** * @Description:  获取到server.xml文件并解析
+                 * @Param:
+                 * @return:
+                 * @Author: cliffcw
+                 * @Date:
+                 */
                 file = configFile();
                 inputStream = new FileInputStream(file);
                 inputSource = new InputSource(file.toURI().toURL().toString());
