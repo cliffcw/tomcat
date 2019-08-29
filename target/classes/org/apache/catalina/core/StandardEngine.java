@@ -64,6 +64,12 @@ public class StandardEngine extends ContainerBase implements Engine {
     public StandardEngine() {
 
         super();
+        /** * @Description:  设置基础阀StandardEngineValue
+         * @Param:
+         * @return:
+         * @Author: cliffcw
+         * @Date:
+         */
         pipeline.setBasic(new StandardEngineValve());
         /* Set the jmvRoute using the system property jvmRoute */
         try {

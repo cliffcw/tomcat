@@ -1069,14 +1069,25 @@ public abstract class AbstractEndpoint<S> {
             if (socketWrapper == null) {
                 return false;
             }
+            // 尝试循环利用之前回收的SocketProcessor对象，如果没有可回收利用的则
+            // 创建新的SocketProcessor对象
             SocketProcessorBase<S> sc = processorCache.pop();
             if (sc == null) {
+                /**
+                 * 创建SocketProcessor，即Worker线程，基于线程池模式进行创建和管理
+                 */
                 sc = createSocketProcessor(socketWrapper, event);
             } else {
+                /**
+                 * 循环利用回收的SocketProcessor对象
+                 */
                 sc.reset(socketWrapper, event);
             }
             Executor executor = getExecutor();
             if (dispatch && executor != null) {
+                /**
+                 * SocketProcessor实现了Runneble接口，可以直接传入execute方法进行处理
+                 */
                 executor.execute(sc);
             } else {
                 sc.run();
@@ -1195,6 +1206,9 @@ public abstract class AbstractEndpoint<S> {
     }
 
     protected final void startAcceptorThreads() {
+        /**
+         * 默认值为1
+         */
         int count = getAcceptorThreadCount();
         acceptors = new Acceptor[count];
 

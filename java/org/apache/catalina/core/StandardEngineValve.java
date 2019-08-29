@@ -70,6 +70,12 @@ final class StandardEngineValve extends ValveBase {
     public final void invoke(Request request, Response response)
         throws IOException, ServletException {
 
+        /** * @Description:  取出该request相关的host
+         * @Param:
+         * @return:
+         * @Author: cliffcw
+         * @Date:
+         */
         // Select the Host to be used for this Request
         Host host = request.getHost();
         if (host == null) {
@@ -83,6 +89,12 @@ final class StandardEngineValve extends ValveBase {
             request.setAsyncSupported(host.getPipeline().isAsyncSupported());
         }
 
+        /** * @Description:  host.getPipeline()得到host对应的管道，将request和response对象交给host的阀去处理
+         * @Param:
+         * @return:
+         * @Author: cliffcw
+         * @Date:
+         */
         // Ask this Host to process this request
         host.getPipeline().getFirst().invoke(request, response);
 

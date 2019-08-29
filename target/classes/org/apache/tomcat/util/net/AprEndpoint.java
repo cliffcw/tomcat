@@ -460,8 +460,20 @@ public class AprEndpoint extends AbstractEndpoint<Long> implements SNICallBack {
                 createExecutor();
             }
 
+            /** * @Description:  设置最大连接数,默认值为maxConnections = 10000，通过同步器AQS实现。
+             * @Param:
+             * @return:
+             * @Author: cliffcw
+             * @Date:
+             */
             initializeConnectionLatch();
 
+            /** * @Description:  创建、配置并启动线程Pooler
+             * @Param:
+             * @return:
+             * @Author: cliffcw
+             * @Date:
+             */
             // Start poller thread
             poller = new Poller();
             poller.init();
@@ -481,6 +493,12 @@ public class AprEndpoint extends AbstractEndpoint<Long> implements SNICallBack {
                 sendfileThread.start();
             }
 
+            /** * @Description:  启动Acceptor线程
+             * @Param:
+             * @return:
+             * @Author: cliffcw
+             * @Date:
+             */
             startAcceptorThreads();
         }
     }

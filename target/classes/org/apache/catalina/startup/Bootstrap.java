@@ -62,9 +62,21 @@ public final class Bootstrap {
     private static final Pattern PATH_PATTERN = Pattern.compile("(\".*?\")|(([^,])*)");
 
     static {
+        /** * @Description:  第二步 获取tomcat的安装目录
+         * @Param:
+         * @return:
+         * @Author: cliffcw
+         * @Date:
+         */
         // Will always be non-null
         String userDir = System.getProperty("user.dir");
 
+        /** * @Description:  tomcat的安装目录 catalina.home
+         * @Param:
+         * @return:
+         * @Author: cliffcw
+         * @Date:
+         */
         // Home first
         String home = System.getProperty(Globals.CATALINA_HOME_PROP);
         File homeFile = null;
@@ -79,6 +91,12 @@ public final class Bootstrap {
         }
 
         if (homeFile == null) {
+            /** * @Description:  bootstrap的根目录，其实就是tomcat安装路径下的bin文件夹
+             * @Param:
+             * @return:
+             * @Author: cliffcw
+             * @Date:
+             */
             // First fall-back. See if current directory is a bin directory
             // in a normal Tomcat install
             File bootstrapJar = new File(userDir, "bootstrap.jar");
@@ -143,11 +161,21 @@ public final class Bootstrap {
 
     private void initClassLoaders() {
         try {
+            /** * @Description:
+             * commonLoader 加载的类库是catalina.base和catalina.home下lib中的文件。common是服务器和web应用程序共用的类加载器，也是server和shared的父加载器。
+             * @Param:
+             * @return:
+             * @Author: cliffcw
+             * @Date:
+             */
             commonLoader = createClassLoader("common", null);
             if( commonLoader == null ) {
                 // no config file, default to this loader - we might be in a 'single' env.
                 commonLoader=this.getClass().getClassLoader();
             }
+            /**
+             * commonLoader 是server和shared的父类加载器  因为server.loader 和 shared.loader 在catalina.properties中设置的路径都为空
+             */
             catalinaLoader = createClassLoader("server", commonLoader);
             sharedLoader = createClassLoader("shared", commonLoader);
         } catch (Throwable t) {
@@ -161,6 +189,13 @@ public final class Bootstrap {
     private ClassLoader createClassLoader(String name, ClassLoader parent)
         throws Exception {
 
+        /** * @Description:
+         * server.loader=,所以server加载器的类加载路径和它的父加载器commonClassLoader一样
+         * @Param:
+         * @return:
+         * @Author: cliffcw
+         * @Date:
+         */
         String value = CatalinaProperties.getProperty(name + ".loader");
         if ((value == null) || (value.equals("")))
             return parent;
@@ -254,8 +289,25 @@ public final class Bootstrap {
      */
     public void init() throws Exception {
 
+        /** * @Description:
+         * 第三步 初始化类加载器 tomcat实现自定义的类加载器 common server shared
+         * tomcat 系统类只能通过server类加载器加载
+         * web 应用程序由share类加载器下的WebAppClassLoader加载
+         * jsp 由JasperLoader类加载器加载
+         * @Param:
+         * @return:
+         * @Author: cliffcw
+         * @Date:
+         */
         initClassLoaders();
 
+        /** * @Description:
+         * 初始化catalinaClassLoader后在init方法中设置为当前线程的类加载器，然后完成对rg.apache.catalina.startup.Catalina类的加载。
+         * @Param:
+         * @return:
+         * @Author: cliffcw
+         * @Date:
+         */
         Thread.currentThread().setContextClassLoader(catalinaLoader);
 
         SecurityClassLoad.securityClassLoad(catalinaLoader);
@@ -263,7 +315,26 @@ public final class Bootstrap {
         // Load our startup class and call its process() method
         if (log.isDebugEnabled())
             log.debug("Loading startup class");
+
+        /** * @Description:
+         * 完成对rg.apache.catalina.startup.Catalina类的加载。
+         * @Param:
+         * @return:
+         * @Author: cliffcw
+         * @Date:
+         */
         Class<?> startupClass = catalinaLoader.loadClass("org.apache.catalina.startup.Catalina");
+
+        /** * @Description:
+         *
+         * 利用反射机制事理化org.apache.catalina.startup.Catalina类
+         * Catalina主要职责是解析server.xml文件，完成Server，Service，Connector等组件的启动和关闭，接受tomcat停止指令，关闭tomcat服务器。
+         *
+         * @Param:
+         * @return:
+         * @Author: cliffcw
+         * @Date:
+         */
         Object startupInstance = startupClass.getConstructor().newInstance();
 
         // Set the shared extensions class loader
@@ -456,10 +527,14 @@ public final class Bootstrap {
      */
     public static void main(String args[]) {
 
-        System.out.println("main is beginning ~~~");
-
         if (daemon == null) {
             // Don't set daemon until init() has completed
+            /** * @Description:  第一步 初始化Bootstrap
+             * @Param:
+             * @return:
+             * @Author: cliffcw
+             * @Date:
+             */
             Bootstrap bootstrap = new Bootstrap();
             try {
                 bootstrap.init();
