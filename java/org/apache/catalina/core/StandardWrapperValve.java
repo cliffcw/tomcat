@@ -99,8 +99,14 @@ final class StandardWrapperValve
         // This should be a Request attribute...
         long t1=System.currentTimeMillis();
         requestCount.incrementAndGet();
+        /**
+         * 获取关联的standWrapper
+         */
         StandardWrapper wrapper = (StandardWrapper) getContainer();
         Servlet servlet = null;
+        /**
+         * wrapper的父容器
+         */
         Context context = (Context) wrapper.getParent();
 
         // Check for the application being marked unavailable
@@ -131,6 +137,10 @@ final class StandardWrapperValve
         // Allocate a servlet instance to process this request
         try {
             if (!unavailable) {
+                /**
+                 * 分配一个servlet实例处理该request servlet可用时，分配servlet
+                 * 主要功能是分配一个初始化了的servlet实例，其service方法可以被调用。
+                 */
                 servlet = wrapper.allocate();
             }
         } catch (UnavailableException e) {
@@ -169,11 +179,15 @@ final class StandardWrapperValve
         request.setAttribute(Globals.DISPATCHER_REQUEST_PATH_ATTR,
                 requestPathMB);
         // Create the filter chain for this request
+        /**
+         * 为该request设置过滤器
+         */
         ApplicationFilterChain filterChain =
                 ApplicationFilterFactory.createFilterChain(request, wrapper, servlet);
 
         // Call the filter chain for this request
         // NOTE: This also calls the servlet's service() method
+        //过滤器作用于该request，并且此过程中调用了servlet的service()方法
         try {
             if ((servlet != null) && (filterChain != null)) {
                 // Swallow output if needed
@@ -255,11 +269,17 @@ final class StandardWrapperValve
             exception(request, response, e);
         }
 
+        /**
+         * 释放该request的过滤链
+         */
         // Release the filter chain (if any) for this request
         if (filterChain != null) {
             filterChain.release();
         }
 
+        /**
+         * 回收servlet容器实例
+         */
         // Deallocate the allocated servlet instance
         try {
             if (servlet != null) {

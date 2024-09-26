@@ -107,12 +107,18 @@ final class StandardHostValve extends ValveBase {
     public final void invoke(Request request, Response response)
         throws IOException, ServletException {
 
+        /**
+         * 该request容器关联的Context，保存在MappingData中
+         */
         // Select the Context to be used for this Request
         Context context = request.getContext();
         if (context == null) {
             return;
         }
 
+        /**
+         * 是否支持异步
+         */
         if (request.isAsyncSupported()) {
             request.setAsyncSupported(context.getPipeline().isAsyncSupported());
         }
@@ -120,6 +126,9 @@ final class StandardHostValve extends ValveBase {
         boolean asyncAtStart = request.isAsync();
 
         try {
+            /**
+             * 设置StandardHostValve的类加载器
+             */
             context.bind(Globals.IS_SECURITY_ENABLED, MY_CLASSLOADER);
 
             if (!asyncAtStart && !context.fireRequestInitEvent(request.getRequest())) {
@@ -135,6 +144,9 @@ final class StandardHostValve extends ValveBase {
             // application defined error pages so DO NOT forward them to the the
             // application for processing.
             try {
+                /**
+                 * 将request传递给Context的阀去处理，有错误的页面必须在此处处理，不会继续向下传递到Context容器中
+                 */
                 if (!response.isErrorReportRequired()) {
                     context.getPipeline().getFirst().invoke(request, response);
                 }
@@ -144,6 +156,9 @@ final class StandardHostValve extends ValveBase {
                 // If a new error occurred while trying to report a previous
                 // error allow the original error to be reported.
                 if (!response.isErrorReportRequired()) {
+                    /**
+                     * 设置错误页面
+                     */
                     request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, t);
                     throwable(request, response, t);
                 }

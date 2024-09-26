@@ -222,6 +222,9 @@ public class CoyoteAdapter implements Adapter {
                 }
             }
 
+            /**
+             * connector.getService().getContainer()得到Connector关联的Container，然后将request和response对象交给Engine的管道Pineline中的阀去处理。
+             */
             // Has an error occurred during async processing that needs to be
             // processed by the application's error page mechanism (or Tomcat's
             // if the application doesn't define one)?

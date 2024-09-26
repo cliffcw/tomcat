@@ -557,26 +557,26 @@ public class MBeanFactory {
      *
      * @exception Exception if an MBean cannot be created or registered
      */
-    public String createStandardServiceEngine(String domain,
-            String defaultHost, String baseDir) throws Exception{
-
-        if (!(container instanceof Server)) {
-            throw new Exception("Container not Server");
-        }
-
-        StandardEngine engine = new StandardEngine();
-        engine.setDomain(domain);
-        engine.setName(domain);
-        engine.setDefaultHost(defaultHost);
-
-        Service service = new StandardService();
-        service.setContainer(engine);
-        service.setName(domain);
-
-        ((Server) container).addService(service);
-
-        return engine.getObjectName().toString();
-    }
+//    public String createStandardServiceEngine(String domain,
+//            String defaultHost, String baseDir) throws Exception{
+//
+//        if (!(container instanceof Server)) {
+//            throw new Exception("Container not Server");
+//        }
+//
+//        StandardEngine engine = new StandardEngine();
+//        engine.setDomain(domain);
+//        engine.setName(domain);
+//        engine.setDefaultHost(defaultHost);
+//
+//        Service service = new StandardService();
+//        service.setContainer(engine);
+//        service.setName(domain);
+//
+//        ((Server) container).addService(service);
+//
+//        return engine.getObjectName().toString();
+//    } 自己注释掉的
 
 
     /**

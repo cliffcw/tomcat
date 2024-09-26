@@ -740,6 +740,11 @@ public class StandardWrapper extends ContainerBase
     @Override
     public Servlet allocate() throws ServletException {
 
+        /**
+         * 主要功能是分配一个初始化了的servlet实例，其service方法可以被调用。
+         */
+
+        //servlet类没有加载时剖出异常
         // If we are currently unloading this servlet, throw an exception
         if (unloading) {
             throw new ServletException(sm.getString("standardWrapper.unloading", getName()));
@@ -750,6 +755,9 @@ public class StandardWrapper extends ContainerBase
         // If not SingleThreadedModel, return the same instance every time
         if (!singleThreadModel) {
             // Load and initialize our instance if necessary
+            /**
+             * servlet没有加载时要先载入该servlet
+             */
             if (instance == null || !instanceInitialized) {
                 synchronized (this) {
                     if (instance == null) {
@@ -760,8 +768,12 @@ public class StandardWrapper extends ContainerBase
 
                             // Note: We don't know if the Servlet implements
                             // SingleThreadModel until we have loaded it.
+                            /**
+                             * 加载servlet，接下来继续分析loadServlet()方法
+                             */
                             instance = loadServlet();
                             newInstance = true;
+                            //类加载之前并不知道该servlet是否为singleThreadModel，在loadServlet()中会改变singleThreadModel的值，所以此处要再判断一次
                             if (!singleThreadModel) {
                                 // For non-STM, increment here to prevent a race
                                 // condition with unload. Bug 43683, test case
@@ -781,6 +793,7 @@ public class StandardWrapper extends ContainerBase
                 }
             }
 
+            //新加载的servlet实现singleThreadModel时将instance加入到instancePool中，否则直接返回instance
             if (singleThreadModel) {
                 if (newInstance) {
                     // Have to do this outside of the sync above to prevent a
@@ -803,6 +816,9 @@ public class StandardWrapper extends ContainerBase
             }
         }
 
+        /**
+         * SingleThreadedModel类型的servlet时返回instancePool中的一个instance。
+         */
         synchronized (instancePool) {
             while (countAllocated.get() >= nInstances) {
                 // Allocate a new instance if possible, or else wait
